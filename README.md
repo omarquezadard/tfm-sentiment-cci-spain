@@ -1,41 +1,156 @@
-# Institutional Discourse Sentiment vs. Consumer Confidence Index in Spain (2024–2026)
+# Sentimiento del Discurso Institucional vs. Índice de Confianza del Consumidor — España (2024–2026)
+# Institutional Discourse Sentiment vs. Consumer Confidence Index — Spain (2024–2026)
 
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python)](https://www.python.org/)
 [![Model](https://img.shields.io/badge/NLP-pysentimiento%20RoBERTa--es-teal)](https://github.com/pysentimiento/pysentimiento)
 [![Data](https://img.shields.io/badge/Data-Eurostat%20%7C%20X%20API%20v2-orange)](https://ec.europa.eu/eurostat)
 [![License](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey)](LICENSE)
-[![TFM](https://img.shields.io/badge/Master's%20Thesis-UCJC%20Data%20Science-1A2C5B)](thesis/)
-
-> **Master's Thesis (TFM)** — *Máster Universitario en Ciencia de Datos*  
-> Universidad Camilo José Cela · March 2026  
-> **Author:** Omar Francisco Quezada Dalmau · **Supervisor:** Ana Lazcano de Rojas
+[![TFM](https://img.shields.io/badge/TFM-UCJC%20Ciencia%20de%20Datos-1A2C5B)](thesis/)
 
 ---
 
-## Overview
+> 🇪🇸 [Español](#-español) · 🇬🇧 [English](#-english)
+
+---
+
+## 🇪🇸 Español
+
+### Descripción
+
+Este proyecto analiza si el **tono del discurso institucional** publicado por el
+Ministerio de Economía, Comercio y Empresa (`@_minecogob`) en X (antes Twitter)
+guarda relación con la evolución del **Índice de Confianza del Consumidor (CCI)**
+en España durante el periodo 2024–2026.
+
+Mediante análisis de sentimiento con PLN sobre 716 tweets originales y métodos
+econométricos de series temporales sobre 25 observaciones mensuales, **el estudio
+no encuentra una asociación contemporánea ni una relación predictiva robusta y
+estadísticamente significativa** entre el sentimiento institucional y la confianza
+del consumidor.
+
+### Pregunta de investigación
+
+> *¿El tono de la comunicación institucional del Ministerio se correlaciona con
+> — o anticipa — el Índice de Confianza del Consumidor en España?*
+
+### Resultados principales
+
+| Métrica | Valor | Interpretación |
+|---|---|---|
+| Pearson *r* (lag 0) | 0,147 (p = 0,484) | Positivo débil, no significativo |
+| Spearman *r* (lag 0) | 0,200 (p = 0,339) | Positivo débil, no significativo |
+| ADF — Sentiment Score | −2,809 (p = 0,057) | Límite de estacionariedad — tratada como I(1) |
+| ADF — CCI (niveles) | −2,080 (p = 0,253) | No estacionaria — tratada como I(1) |
+| CCF máximo (lag 5) | −0,290 | Por debajo del IC 95% (±0,400) — no significativo |
+| Causalidad de Granger (lags 1–3) | p > 0,05 | No se rechaza H₀ de no causalidad |
+| Clase dominante de sentimiento | NEU — 83,2% | Coherente con tono informativo institucional |
+
+> **Conclusión:** la ausencia de relación significativa es en sí misma un hallazgo
+> relevante. El discurso oficial no refleja ni anticipa de forma estadísticamente
+> robusta la percepción de los hogares en el periodo analizado.
+
+### Metodología
+
+```
+API X v2                   Eurostat (ei_bsco_m)
+     │                            │
+     ▼                            ▼
+~716 tweets originales       CCI España (SA)
+(sin retweets desde API)     25 obs. mensuales
+     │
+     │ Limpieza Regex (URLs, @menciones)
+     ▼
+pysentimiento (RoBERTa-es)
+  → prob_POS, prob_NEG, prob_NEU
+     │
+     │ Agregación mensual (resample)
+     │ Score = mean(POS) − mean(NEG)
+     ▼
+Comparación de series (ambas I(1) → primera diferencia)
+  ├── ADF (estacionariedad)
+  ├── Pearson & Spearman (correlación en nivel)
+  ├── CCF (lags 0–5, sobre series diferenciadas)
+  └── Causalidad de Granger (lags 1–3)
+```
+
+### Estructura del repositorio
+
+```
+tfm-sentiment-cci-spain/
+├── README.md
+├── requirements.txt          # Dependencias directas (versiones mínimas compatibles)
+├── requirements-lock.txt     # Versiones aproximadas del entorno del TFM (marzo 2026)
+├── .gitignore
+├── LICENSE
+├── notebook/
+│   └── sentiment_cci_spain.ipynb   # Pipeline completo reproducible
+├── thesis/
+│   └── TFM_Omar_Quezada_Final.pdf  # Documento completo del TFM
+└── data/
+    ├── README_data.md              # Cómo obtener los datos
+    └── cci_spain.csv               # CCI España SA — Eurostat (dominio público) ✅
+```
+
+### Reproducibilidad
+
+El repositorio contiene el pipeline completo, pero la reproducción exacta del
+corpus depende de la disponibilidad de los datos de X:
+
+- **`data/cci_spain.csv`** — incluido. Datos públicos de Eurostat.
+- **`tweets_minecogob.csv`** — no incluido (Términos de la API de X). Ver `data/README_data.md`.
+
+### Instalación
+
+```bash
+git clone https://github.com/omarquezadard/tfm-sentiment-cci-spain.git
+cd tfm-sentiment-cci-spain
+python -m venv venv && source venv/bin/activate
+pip install -r requirements.txt
+jupyter notebook notebook/sentiment_cci_spain.ipynb
+```
+
+### Cita
+
+```bibtex
+@mastersthesis{quezada2026sentiment,
+  author = {Quezada Dalmau, Omar Francisco},
+  title  = {Comparativa del Índice de Sentimiento del Consumidor con el
+             Análisis de Sentimiento del Discurso con Tweets del
+             Ministerio de Comercio en Distintos Momentos},
+  school = {Universidad Camilo José Cela},
+  year   = {2026},
+  month  = {March},
+  url    = {https://github.com/omarquezadard/tfm-sentiment-cci-spain}
+}
+```
+
+### Autor
+
+**Omar Francisco Quezada Dalmau**  
+Fundador, SUBROSA · Director, SonDatos  
+🇩🇴 República Dominicana  
+[GitHub](https://github.com/omarquezadard)
+
+---
+
+## 🇬🇧 English
+
+### Overview
 
 This project explores whether the **tone of institutional discourse** published by
-Spain's Ministry of Economy, Trade and Business (`@_minecogob`) on X (formerly
-Twitter) is related to the evolution of the **Consumer Confidence Index (CCI)**
-over the same period.
+Spain's Ministry of Economy, Trade and Business (`@_minecogob`) on X (formerly Twitter)
+is related to the evolution of the **Consumer Confidence Index (CCI)** over the same period.
 
-Using NLP sentiment analysis on 716 original tweets and econometric time-series
-methods on 25 monthly observations, **the study finds no statistically significant
-contemporaneous or lagged association** between institutional sentiment and consumer
-confidence. Both series are non-stationary (treated as I(1) after first differencing),
-and the cross-correlation function reveals no coefficient that surpasses the 95%
-confidence interval across the six lags analysed.
+Using NLP sentiment analysis on 716 original tweets and econometric time-series methods
+on 25 monthly observations, **the study finds no statistically significant contemporaneous
+or robust predictive relationship** between institutional sentiment and consumer confidence.
 
----
-
-## Research Question
+### Research Question
 
 > *Does the sentiment tone of the Ministry's institutional communication correlate
 > with — or predict — the Consumer Confidence Index in Spain?*
 
----
-
-## Key Findings
+### Key Findings
 
 | Metric | Value | Interpretation |
 |---|---|---|
@@ -43,181 +158,78 @@ confidence interval across the six lags analysed.
 | Spearman *r* (lag 0) | 0.200 (p = 0.339) | Weak positive, not significant |
 | ADF — Sentiment Score | −2.809 (p = 0.057) | Near-boundary — treated as I(1) |
 | ADF — CCI (levels) | −2.080 (p = 0.253) | Non-stationary — treated as I(1) |
-| CCF max absolute value | −0.290 (lag 5) | Below IC 95% (±0.400) — not significant |
+| CCF max (lag 5) | −0.290 | Below IC 95% (±0.400) — not significant |
 | Granger causality (lags 1–3) | p > 0.05 | H₀ of non-causality not rejected |
 | Dominant sentiment class | NEU — 83.2% | Consistent with informational tone |
 
-> **Summary:** The study finds no statistically significant contemporaneous association
-> or robust predictive relationship between institutional sentiment and consumer
-> confidence. Exploratory lagged patterns were observed, but none remained stable
-> across the robustness analyses to support a predictive interpretation.
+> **Summary:** The absence of a significant relationship is itself a relevant finding.
+> The official discourse neither reflects nor anticipates household perception in a
+> statistically robust way during the period analysed.
 
----
-
-## Reproducibility Notice
-
-This repository contains the **complete analysis pipeline**, but exact reproduction
-of the original corpus depends on access to X (Twitter) data:
-
-- **CCI Spain** (`data/cci_spain.csv`) — included. Public domain data from Eurostat.
-- **Raw Eurostat file** (`ei_bsco_m_linear.csv`) — must be downloaded separately
-  (see `data/README_data.md`). Used to regenerate `cci_spain.csv` if needed.
-- **Tweets** (`tweets_minecogob.csv`) — **not included** due to X Developer Agreement.
-  Must be extracted via API (see `data/README_data.md`). Note that some tweets
-  may have been deleted or become unavailable since the original extraction.
-
-> The pipeline is fully reproducible from the CSV files. Re-extracting tweets via
-> the API may yield a slightly different corpus depending on current data availability.
-
----
-
-## Methodology
+### Methodology
 
 ```
-X API v2              Eurostat (ei_bsco_m)
-    │                        │
-    ▼                        ▼
- ~716 original tweets    CCI Spain (SA)
- (retweets excluded        25 monthly obs.
-  at API level)
-    │
-    │ Regex cleaning
-    │ (URLs, @mentions, ctrl chars)
-    ▼
+X API v2                   Eurostat (ei_bsco_m)
+     │                            │
+     ▼                            ▼
+~716 original tweets         CCI Spain (SA)
+(retweets excluded at API)   25 monthly obs.
+     │
+     │ Regex cleaning (URLs, @mentions)
+     ▼
 pysentimiento (RoBERTa-es)
   → prob_POS, prob_NEG, prob_NEU
-    │
-    │ Monthly aggregation
-    │ Score = mean(POS) − mean(NEG)
-    ▼
-Time-series comparison (both series I(1) → first-differenced)
+     │
+     │ Monthly aggregation (resample)
+     │ Score = mean(POS) − mean(NEG)
+     ▼
+Time-series comparison (both I(1) → first-differenced)
   ├── ADF stationarity test
   ├── Pearson & Spearman correlation (levels)
-  ├── Cross-Correlation Function (CCF, lags 0–5, on Δ series)
-  └── Granger causality test (lags 1–3, on Δ series)
+  ├── CCF (lags 0–5, differenced series)
+  └── Granger causality (lags 1–3)
 ```
 
----
+### Reproducibility Notice
 
-## Repository Structure
+- **`data/cci_spain.csv`** — included. Public domain data from Eurostat.
+- **`tweets_minecogob.csv`** — not included (X Developer Agreement). See `data/README_data.md`.
 
-```
-tfm-sentiment-cci-spain/
-│
-├── README.md                       # This file
-├── requirements.txt                # Direct dependencies (minimum compatible versions)
-├── requirements-lock.txt           # Approximate versions from the thesis period (March 2026)
-├── .gitignore
-├── LICENSE
-│
-├── notebook/
-│   └── sentiment_cci_spain.ipynb   # Full reproducible pipeline
-│
-├── thesis/
-│   └── TFM_Omar_Quezada_Final.pdf  # Full thesis document
-│
-└── data/
-    ├── README_data.md              # How to obtain the raw data
-    └── cci_spain.csv               # CCI Spain SA (Eurostat, public domain) ✅ included
-```
+A new extraction may return a different number of posts as some tweets may have
+been deleted or become unavailable since the original study.
 
----
-
-## Setup & Reproducibility
-
-### 1. Clone the repository
+### Setup
 
 ```bash
 git clone https://github.com/omarquezadard/tfm-sentiment-cci-spain.git
 cd tfm-sentiment-cci-spain
-```
-
-### 2. Create a virtual environment
-
-```bash
-python -m venv venv
-source venv/bin/activate        # Windows: venv\Scripts\activate
+python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
-```
-
-### 3. Obtain the tweet data
-
-Follow instructions in [`data/README_data.md`](data/README_data.md).
-Set your Bearer Token as an environment variable:
-
-```bash
-export X_BEARER_TOKEN="your_token_here"
-```
-
-### 4. Run the notebook
-
-```bash
 jupyter notebook notebook/sentiment_cci_spain.ipynb
 ```
 
-Set `RUN_EXTRACTION = True` to re-run tweet extraction, or `False` to use
-your local CSV and skip directly to the analysis.
-
----
-
-## Data Sources
-
-| Dataset | Source | License |
-|---|---|---|
-| Consumer Confidence Indicator — Spain | [Eurostat `ei_bsco_m`](https://ec.europa.eu/eurostat/databrowser/view/ei_bsco_m) | Open data (CC BY 4.0) |
-| Tweets — `@_minecogob` | X API v2 (timeline endpoint) | X Developer Agreement |
-
----
-
-## Dependencies
-
-See `requirements.txt` for direct dependencies (minimum compatible versions).
-`requirements-lock.txt` contains approximate package versions from the thesis
-environment (March 2026). To generate an exact lock file from your own environment:
-```bash
-pip freeze > requirements-lock.txt
-```
-
-| Library | Purpose |
-|---|---|
-| `pysentimiento` | Sentiment analysis (RoBERTa-es) |
-| `transformers` | HuggingFace transformer models |
-| `pandas` | Data manipulation & resampling |
-| `statsmodels` | ADF, CCF, Granger tests |
-| `scipy` | Pearson & Spearman correlations |
-| `matplotlib` / `seaborn` | Visualisation |
-| `wordcloud` | Word cloud generation |
-| `requests` | X API v2 calls |
-
----
-
-## Citation
+### Citation
 
 ```bibtex
 @mastersthesis{quezada2026sentiment,
-  author    = {Quezada Dalmau, Omar Francisco},
-  title     = {Comparativa del Índice de Sentimiento del Consumidor con el
-               Análisis de Sentimiento del Discurso con Tweets del
-               Ministerio de Comercio en Distintos Momentos},
-  school    = {Universidad Camilo José Cela},
-  year      = {2026},
-  month     = {March},
-  type      = {Trabajo Fin de Máster},
-  url       = {https://github.com/omarquezadard/tfm-sentiment-cci-spain}
+  author = {Quezada Dalmau, Omar Francisco},
+  title  = {Comparativa del Índice de Sentimiento del Consumidor con el
+             Análisis de Sentimiento del Discurso con Tweets del
+             Ministerio de Comercio en Distintos Momentos},
+  school = {Universidad Camilo José Cela},
+  year   = {2026},
+  month  = {March},
+  url    = {https://github.com/omarquezadard/tfm-sentiment-cci-spain}
 }
 ```
 
----
-
-## License
+### License
 
 - **Code & notebook:** [MIT License](LICENSE)
 - **Thesis document:** [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
 - **Tweet content:** Subject to [X Developer Agreement](https://developer.x.com/en/developer-terms/agreement-and-policy). Raw data not redistributed.
 
----
-
-## Contact
+### Author
 
 **Omar Francisco Quezada Dalmau**  
 Founder, SUBROSA · Director, SonDatos  
