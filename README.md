@@ -124,7 +124,7 @@ export X_BEARER_TOKEN="your_token_here"
 ### 4. Run the notebook
 
 ```bash
-jupyter notebook notebook/Scrapping_TFM_final.ipynb
+jupyter notebook notebook/sentiment_cci_spain.ipynb
 ```
 
 Set `RUN_EXTRACTION = True` if you want to re-run the tweet extraction, or `False` to skip directly to the analysis using your local CSV.
