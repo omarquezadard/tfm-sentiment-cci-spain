@@ -14,15 +14,24 @@
 
 ## Overview
 
-This project explores whether the **tone of institutional discourse** published by Spain's Ministry of Economy, Trade and Business (`@_minecogob`) on X (formerly Twitter) is related to the evolution of the **Consumer Confidence Index (CCI)** over the same period.
+This project explores whether the **tone of institutional discourse** published by
+Spain's Ministry of Economy, Trade and Business (`@_minecogob`) on X (formerly
+Twitter) is related to the evolution of the **Consumer Confidence Index (CCI)**
+over the same period.
 
-Using NLP sentiment analysis on 716 original tweets and econometric time-series methods on 25 monthly observations, the study finds **no statistically significant contemporaneous correlation**, but surfaces an exploratory **inverse lag pattern at lag 4** in the cross-correlation function — a gap between official narrative and household perception that warrants further investigation.
+Using NLP sentiment analysis on 716 original tweets and econometric time-series
+methods on 25 monthly observations, **the study finds no statistically significant
+contemporaneous or lagged association** between institutional sentiment and consumer
+confidence. Both series are non-stationary (treated as I(1) after first differencing),
+and the cross-correlation function reveals no coefficient that surpasses the 95%
+confidence interval across the six lags analysed.
 
 ---
 
 ## Research Question
 
-> *Does the sentiment tone of the Ministry's institutional communication correlate with — or predict — the Consumer Confidence Index in Spain?*
+> *Does the sentiment tone of the Ministry's institutional communication correlate
+> with — or predict — the Consumer Confidence Index in Spain?*
 
 ---
 
@@ -32,25 +41,45 @@ Using NLP sentiment analysis on 716 original tweets and econometric time-series 
 |---|---|---|
 | Pearson *r* (lag 0) | 0.147 (p = 0.484) | Weak positive, not significant |
 | Spearman *r* (lag 0) | 0.200 (p = 0.339) | Weak positive, not significant |
-| CCF lag 4 | −0.387 | Exploratory inverse pattern |
-| Granger causality (lag 1–3) | p = 0.36–0.87 | H₀ of non-causality not rejected |
-| ADF — Sentiment Score | −4.308 (p = 0.0004) | Stationary ✓ |
-| ADF — CCI | −0.811 (p = 0.816) | Non-stationary ✗ |
+| ADF — Sentiment Score | −2.809 (p = 0.057) | Near-boundary — treated as I(1) |
+| ADF — CCI (levels) | −2.080 (p = 0.253) | Non-stationary — treated as I(1) |
+| CCF max absolute value | −0.290 (lag 5) | Below IC 95% (±0.400) — not significant |
+| Granger causality (lags 1–3) | p > 0.05 | H₀ of non-causality not rejected |
 | Dominant sentiment class | NEU — 83.2% | Consistent with informational tone |
+
+> **Summary:** The study finds no statistically significant contemporaneous association
+> or robust predictive relationship between institutional sentiment and consumer
+> confidence. Exploratory lagged patterns were observed, but none remained stable
+> across the robustness analyses to support a predictive interpretation.
+
+---
+
+## Reproducibility Notice
+
+This repository contains the **complete analysis pipeline**, but exact reproduction
+of the original corpus depends on access to X (Twitter) data:
+
+- **CCI Spain** (`data/cci_spain.csv`) — included. Public domain data from Eurostat.
+- **Raw Eurostat file** (`ei_bsco_m_linear.csv`) — must be downloaded separately
+  (see `data/README_data.md`). Used to regenerate `cci_spain.csv` if needed.
+- **Tweets** (`tweets_minecogob.csv`) — **not included** due to X Developer Agreement.
+  Must be extracted via API (see `data/README_data.md`). Note that some tweets
+  may have been deleted or become unavailable since the original extraction.
+
+> The pipeline is fully reproducible from the CSV files. Re-extracting tweets via
+> the API may yield a slightly different corpus depending on current data availability.
 
 ---
 
 ## Methodology
 
 ```
-X API v2         Eurostat (ei_bsco_m)
-    │                     │
-    ▼                     ▼
- 1,100 tweets        CCI Spain (SA)
-    │             25 monthly obs.
-    │ filter RT
-    ▼
- 716 original tweets
+X API v2              Eurostat (ei_bsco_m)
+    │                        │
+    ▼                        ▼
+ ~716 original tweets    CCI Spain (SA)
+ (retweets excluded        25 monthly obs.
+  at API level)
     │
     │ Regex cleaning
     │ (URLs, @mentions, ctrl chars)
@@ -61,11 +90,11 @@ pysentimiento (RoBERTa-es)
     │ Monthly aggregation
     │ Score = mean(POS) − mean(NEG)
     ▼
-Time-series comparison
+Time-series comparison (both series I(1) → first-differenced)
   ├── ADF stationarity test
-  ├── Pearson & Spearman correlation
-  ├── Cross-Correlation Function (CCF, lags 0–6)
-  └── Granger causality test (lags 1–3)
+  ├── Pearson & Spearman correlation (levels)
+  ├── Cross-Correlation Function (CCF, lags 0–5, on Δ series)
+  └── Granger causality test (lags 1–3, on Δ series)
 ```
 
 ---
@@ -75,23 +104,22 @@ Time-series comparison
 ```
 tfm-sentiment-cci-spain/
 │
-├── README.md                    # This file
-├── requirements.txt             # Python dependencies
+├── README.md                       # This file
+├── requirements.txt                # Direct dependencies (minimum compatible versions)
+├── requirements-lock.txt           # Exact versions used to produce the results
 ├── .gitignore
 ├── LICENSE
 │
 ├── notebook/
-│   └── Scrapping_TFM_final.ipynb   # Full reproducible pipeline
+│   └── sentiment_cci_spain.ipynb   # Full reproducible pipeline
 │
 ├── thesis/
 │   └── TFM_Omar_Quezada_Final.pdf  # Full thesis document
 │
 └── data/
-    ├── README_data.md           # How to obtain the raw data
-    └── cci_spain.csv            # CCI Spain (Eurostat, public domain)
+    ├── README_data.md              # How to obtain the raw data
+    └── cci_spain.csv               # CCI Spain SA (Eurostat, public domain) ✅ included
 ```
-
-> **Note on tweets:** Raw tweet data cannot be redistributed under X Developer Agreement. See [`data/README_data.md`](data/README_data.md) for instructions on how to reproduce the extraction using the official API.
 
 ---
 
@@ -100,7 +128,7 @@ tfm-sentiment-cci-spain/
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/<your-username>/tfm-sentiment-cci-spain.git
+git clone https://github.com/omarquezadard/tfm-sentiment-cci-spain.git
 cd tfm-sentiment-cci-spain
 ```
 
@@ -112,10 +140,10 @@ source venv/bin/activate        # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 3. Obtain the data
+### 3. Obtain the tweet data
 
-- **CCI Spain:** already included in `data/cci_spain.csv` (Eurostat, public domain).
-- **Tweets:** follow instructions in [`data/README_data.md`](data/README_data.md) to extract them via the X API v2. Set your Bearer Token as an environment variable:
+Follow instructions in [`data/README_data.md`](data/README_data.md).
+Set your Bearer Token as an environment variable:
 
 ```bash
 export X_BEARER_TOKEN="your_token_here"
@@ -127,7 +155,8 @@ export X_BEARER_TOKEN="your_token_here"
 jupyter notebook notebook/sentiment_cci_spain.ipynb
 ```
 
-Set `RUN_EXTRACTION = True` if you want to re-run the tweet extraction, or `False` to skip directly to the analysis using your local CSV.
+Set `RUN_EXTRACTION = True` to re-run tweet extraction, or `False` to use
+your local CSV and skip directly to the analysis.
 
 ---
 
@@ -142,7 +171,8 @@ Set `RUN_EXTRACTION = True` if you want to re-run the tweet extraction, or `Fals
 
 ## Dependencies
 
-Key libraries (see `requirements.txt` for full pinned versions):
+See `requirements.txt` for direct dependencies and `requirements-lock.txt` for
+the exact versions used to produce the results in the thesis.
 
 | Library | Purpose |
 |---|---|
@@ -152,13 +182,12 @@ Key libraries (see `requirements.txt` for full pinned versions):
 | `statsmodels` | ADF, CCF, Granger tests |
 | `scipy` | Pearson & Spearman correlations |
 | `matplotlib` / `seaborn` | Visualisation |
+| `wordcloud` | Word cloud generation |
 | `requests` | X API v2 calls |
 
 ---
 
 ## Citation
-
-If you use this work or pipeline, please cite:
 
 ```bibtex
 @mastersthesis{quezada2026sentiment,
@@ -170,7 +199,7 @@ If you use this work or pipeline, please cite:
   year      = {2026},
   month     = {March},
   type      = {Trabajo Fin de Máster},
-  url       = {https://github.com/<your-username>/tfm-sentiment-cci-spain}
+  url       = {https://github.com/omarquezadard/tfm-sentiment-cci-spain}
 }
 ```
 
@@ -179,7 +208,7 @@ If you use this work or pipeline, please cite:
 ## License
 
 - **Code & notebook:** [MIT License](LICENSE)
-- **Thesis document:** [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) — free to share and adapt with attribution.
+- **Thesis document:** [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
 - **Tweet content:** Subject to [X Developer Agreement](https://developer.x.com/en/developer-terms/agreement-and-policy). Raw data not redistributed.
 
 ---
@@ -189,4 +218,4 @@ If you use this work or pipeline, please cite:
 **Omar Francisco Quezada Dalmau**  
 Founder, SUBROSA · Director, SonDatos  
 🇩🇴 Dominican Republic  
-[GitHub](https://github.com/<your-username>) · [LinkedIn](https://linkedin.com/in/<your-profile>)
+[GitHub](https://github.com/omarquezadard)
