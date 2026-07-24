@@ -1,0 +1,42 @@
+# ── Credentials (NEVER commit tokens) ────────────────────────────
+.env
+*.env
+secrets.py
+config_local.py
+
+# ── Tweet data (X Developer Agreement — do not redistribute) ──────
+data/tweets_minecogob.csv
+data/tweets_minecogob_limpio.csv
+
+# ── Python ────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+.venv/
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# ── Jupyter ───────────────────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# ── HuggingFace model cache (large, re-downloadable) ─────────────
+.cache/
+~/.cache/huggingface/
+
+# ── OS ────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── IDE ───────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
