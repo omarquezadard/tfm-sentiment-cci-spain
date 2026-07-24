@@ -106,7 +106,7 @@ tfm-sentiment-cci-spain/
 │
 ├── README.md                       # This file
 ├── requirements.txt                # Direct dependencies (minimum compatible versions)
-├── requirements-lock.txt           # Exact versions used to produce the results
+├── requirements-lock.txt           # Approximate versions from the thesis period (March 2026)
 ├── .gitignore
 ├── LICENSE
 │
@@ -171,8 +171,12 @@ your local CSV and skip directly to the analysis.
 
 ## Dependencies
 
-See `requirements.txt` for direct dependencies and `requirements-lock.txt` for
-the exact versions used to produce the results in the thesis.
+See `requirements.txt` for direct dependencies (minimum compatible versions).
+`requirements-lock.txt` contains approximate package versions from the thesis
+environment (March 2026). To generate an exact lock file from your own environment:
+```bash
+pip freeze > requirements-lock.txt
+```
 
 | Library | Purpose |
 |---|---|
